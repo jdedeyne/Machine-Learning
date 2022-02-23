@@ -1,0 +1,13 @@
+Machine Learning
+----------------
+Sessie 7 is optioneel, opdracht ook niet indienen.
+Punten op 3 van de 6 opdrachten, geen examen.
+
+01 Regressie
+------------
+
+-enkelvoudige lineaire regressie (-> Scatterplot)
+	y = b1*x + b0
+	R² : determinatiecoef. -> hoe goed kan model op basis van verandering van X de verandering van Y voorspellen.
+	
+-
