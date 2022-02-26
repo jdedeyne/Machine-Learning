@@ -35,9 +35,14 @@ Meervoudige lineair regressie
 			#python
 			dataset.corr()
 
+		pairplot/scatterplot
+			#python pairplot
+			sns.pairplot(dataset);
+
 2) Dataset opsplitsen in features (X) en targets (y)
-	y = dataset['target'].values()
-	X = dataset.drop
+	#Python
+	y = dataset.Price.values
+	X = dataset.drop(['Price'],axis=1)
 
 3) dataset opsplitsen in training en test set
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=0)
@@ -45,6 +50,9 @@ Meervoudige lineair regressie
 4) trainen van het model
 	lregmodel = linear_model.LinearRegression()
 	lregmodel.fit(X_train, y_train)
+	# Coëfficiënten en intercept van het lineair regressiemodel
+	print('coeffs: ',lregmodel.coef_)
+	print('intercept', lregmodel.intercept_)
 
 5) testen van het model
 	X_test, y_test
@@ -98,6 +106,16 @@ Meervoudige lineair regressie
 		Robust scaling
 			-ipv min gebruiken we de interkwartielafstand.
 
+		OPLETTEN met standardscaling als je al one-hot encoding hebt uitgevoerd!
+		Min-Max scaling kan er wel mee overweg.		
+		#python
+		from sklearn.preprocessing import StandardScaler
+		scaler = preprocessing.StandardScaler().fit(X_train)  # Normaliseer naar gemiddelde = 0 en standaardafwijking = 1
+		#scaler = preprocessing.MaxAbsScaler().fit(X_train)   # Deel elke waarde door de absolute waarde van het maximum
+		#scaler = preprocessing.MinMaxScaler().fit(X_train)   # Trek van elke waar het min af en deel door (MAX - MIN)
+
+		X_train = scaler.transform(X_train)
+		X_test = scaler.transform(X_test)
 
 	Feature expansion
 		- Bedenken van nieuwe features
@@ -105,28 +123,73 @@ Meervoudige lineair regressie
 			* start en eind -> afstanden
 			* datum -> dag van de week
 			* verandering in de features
-			* nieuwe opgemeten parameters.
+			* nieuwe opgemeten parameters.			
 
 		- Hogere orde features
 			P = theta0 + theta1*x + theta2*x**2
+			1) manueel
+			----------
+			dataset2  = dataset.copy()
+			dataset2.insert(dataset2.columns.size-1,'LSTAT^2',dataset.LSTAT**2)
+			dataset2.insert(dataset2.columns.size-1,'LSTAT^3',dataset.LSTAT**3)
+
+
 			#python
 			graad = 3
 			poly = PolynomialFeatures(graad)
 			poly.fit(X_train)
 			X_train_poly = poly.transform(X_train)
 			X_test_poly = poly.transform(X_test)
+
+			OPM als je conversion fout krijgt na
+			de expansion kan het zijn dat je nog eens
+			moet scaling toepassen.
 		
 		-One-hot encoding
 			omzetten van categorische variabelen naar meerdere aparte features
+			->opletten als je nadien nog
+				* standardscaling toepast
+				* hogere orde features toevoegt
+				=> best zo laat mogelijk.
 			#python
 			dataset = pd.concat([dataset,pd.get_dummies(dataset['food_name'], prefix='food')],axis=1)
 			dataset.drop(['food_name'],axis=1, inplace=True)
-			
-
 
 	Underfitting en overfitting
 		- Underfitting -> hogere macht ontbreekt waardoor niet correct kan gefit worden (te simpel)
+			* model is te simpel
+			* model met hoge bias
+			* hoe underfitting detecteren
+				* R² op train laag
+				* R² op test laag
+
+
 		- Overfitting -> moet exact hetzelfde zijn als trainingset vooraleer het werkt. (te complex)
+			* treedt op wanneer een model de training data te goed modelleert en ook niet kan generaliseren op nieuwe data
+			* ruis van willekeurige fluctuaties in de data wordt opgepikt
+			* model met hoge variance
+			* hoe overfitting detecteren? 
+				* R² op train zeer groot
+				* R² op test is laag
+
+		- Regularisatie (regularization)
+			* methode om de mate van bias van een hypothese te regelen en een goed evenwicht te vinden tss underfitting en overfitting
+		    * R(theta) is de regularisatie-term.
+			* L1 (Lasso) -> optimalisatie op basis van absolute waarden van de theta's 
+				#python
+				# met L1 regularisatie via Lasso regression
+				lregmodel2 = Lasso(alpha=0.5,tol=0.0001,fit_intercept=True)
+				lregmodel2.fit(X_train_2,y_train_2)
+				lregmodel2.score(X_test_2,y_test_2)
+			* L2 (Ridge) -> optimalisatie op basis van kwadraten van de theta's
+				# met L2 regularisatie via Ridge regression
+				lregmodel2 = Ridge(alpha=1,tol=0.0001,fit_intercept=True)
+				lregmodel2.fit(X_train_2,y_train_2)
+				lregmodel2.score(X_test_2,y_test_2)
+
+
+
+
 
 
 					
